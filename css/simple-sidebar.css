@@ -53,10 +53,8 @@
 	width: 200px;
 }
 
-#wrapper .footer {
-	position: absolute;
-	bottom: 0;
-	margin-right: -250px;
+#footer {
+	margin-top: 200px;
 }
 
 /* Sidebar Styles */
