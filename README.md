@@ -2,7 +2,7 @@
 
 ## Dynamic Builder
 
-I got tired of copying content between static html files, so I wrote a build script that creates a static document\_root directory. Just run `build.sh`.
+I got tired of copying content between static html files, so I wrote a build script that creates a static document\_root directory. Just run `build.sh` and point your webserver at `document_root`.
 
 ## Copyright, Credits,  and License
 
