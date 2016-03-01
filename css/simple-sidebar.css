@@ -49,8 +49,9 @@
 	margin-right: -250px;
 }
 
-#wrapper img {
-	width: 200px;
+#profilepic img {
+	width: 250px;
+	margin-left: -20px;
 }
 
 #footer {
