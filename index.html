@@ -1,100 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+	<head>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="">
 
-    <title>Simple Sidebar - Start Bootstrap Template</title>
+		<title>Simple Sidebar - Start Bootstrap Template</title>
 
-    <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+		<!-- Bootstrap Core CSS -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link href="css/simple-sidebar.css" rel="stylesheet">
+		<!-- Custom CSS -->
+		<link href="css/simple-sidebar.css" rel="stylesheet">
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+	</head>
 
-</head>
+	<body>
 
-<body>
+		<div id="wrapper">
 
-    <div id="wrapper">
+			<!-- Sidebar -->
+			<div id="sidebar-wrapper">
+				<ul class="sidebar-nav">
+					<li>
+						<img src="img/jeremy.jpg" />
+					</li>
+					<li class="sidebar-brand">
+						<a href="/">
+							Jeremy Erickson
+						</a>
+					</li>
+					<li>
+						<a href="research.html">Research</a>
+					</li>
+					<li>
+						<a href="teaching.html">Teaching</a>
+					</li>
+					<li>
+						<a href="CV.pdf">Curriculum Vitae</a>
+					</li>
+					<li>
+						<p>University Email: <a href="mailto:jericks@umich.edu">jericks@umich.edu</a></p>
+						<p>Keybase: <a href="https://keybase.io/jericks">jericks</a></p>
+					</li>
+				</ul>
+			</div>
+			<!-- /#sidebar-wrapper -->
 
-        <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                <li class="sidebar-brand">
-                    <a href="#">
-                        Start Bootstrap
-                    </a>
-                </li>
-                <li>
-                    <a href="#">Dashboard</a>
-                </li>
-                <li>
-                    <a href="#">Shortcuts</a>
-                </li>
-                <li>
-                    <a href="#">Overview</a>
-                </li>
-                <li>
-                    <a href="#">Events</a>
-                </li>
-                <li>
-                    <a href="#">About</a>
-                </li>
-                <li>
-                    <a href="#">Services</a>
-                </li>
-                <li>
-                    <a href="#">Contact</a>
-                </li>
-            </ul>
-        </div>
-        <!-- /#sidebar-wrapper -->
+			<!-- Page Content -->
+			<div id="page-content-wrapper">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-12">
+							<h1>Bio</h1>
+							<p>
+								Jeremy is a Ph.D. student at the University of Michigan studying Computer Science and Engineering
+								with a focus on computer security. He received his M.S. in Computer Science from the University
+								of California, Davis, with a focus on Android security and privacy. He has previously been
+								a researcher / developer / teacher at Sandia National Laboratories in California where he led the 
+								<a href="http://www.sandia.gov/careers/students_postdocs/internships/institutes/cyber_defenders.html">Center for Cyber Defenders</a>
+								internship program for several years and co-founded the <a href="https://share.sandia.gov/cta/">Cyber Technologies Academy</a>.
+								He also worked on a bunch of other projects, like <a href="http://www.sandia.gov/LabNews/100618.html">FARM</a>
+								and <a href="http://minimega.org">minimega</a>. He is known for sending embarrassing emails 
+								from any unattended and unlocked computer. You've been warned.
+							</p>
+							<h3>Random Musings</h3>
+							<p>Really not a fan of web programming, let me tell you.</p>
+							<p>Why, if security is applicable to every subfield of computer science, is there only <i>one</i> undergraduate computer security course at most universities?</p>
+							<p>I really need to get better at using GPG. Another grad student I once knew suggested that if I ever emailed him, I encrypt my email so we both could practice. Good advice. Want to help me practice?</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /#page-content-wrapper -->
 
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <h1>Simple Sidebar</h1>
-                        <p>This template has a responsive menu toggling system. The menu will appear collapsed on smaller screens, and will appear non-collapsed on larger screens. When toggled using the button below, the menu will appear/disappear. On small screens, the page content will be pushed off canvas.</p>
-                        <p>Make sure to keep all page content within the <code>#page-content-wrapper</code>.</p>
-                        <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /#page-content-wrapper -->
+			<div class="footer">
+				<p>
+					* The inital template for this page was lovingly ripped off from 
+					<a href="https://github.com/BlackrockDigital/startbootstrap-simple-sidebar">BlackrockDigital</a> 
+					under the MIT license.
+				</p>
+			</div>
+		</div>
+		<!-- /#wrapper -->
 
-    </div>
-    <!-- /#wrapper -->
-
-    <!-- jQuery -->
-    <script src="js/jquery.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
-
-    <!-- Menu Toggle Script -->
-    <script>
-    $("#menu-toggle").click(function(e) {
-        e.preventDefault();
-        $("#wrapper").toggleClass("toggled");
-    });
-    </script>
-
-</body>
+	</body>
 
 </html>
