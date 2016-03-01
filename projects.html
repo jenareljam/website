@@ -2,8 +2,72 @@
 					<div class="row">
 						<div class="col-lg-12">
 							<h1>Projects</h1>
+							<h3>2016</h3>
+							<h4>Building a secure home network</h4>
 							<p>
-								Placeholder
+								Working with <a href="http://web.eecs.umich.edu/~alfchen/">Qi Alfred Chen</a>
+								and advised by <a href="http://web.eecs.umich.edu/~zmao/">Morley Mao</a>. 
+								We just submitted a proposal to Google's
+								<a href="http://googleresearch.blogspot.de/2016/02/announcing-google-internet-of-things.html">IoT Technology Research Award</a>.
+								The idea is to provide
+								<ol>
+									<li>A simple and intuitive method for users to manage local device communication</li>
+									<li>A secure authentication protocol for home networks to manage local devices</li>
+								</ol>
+							</p>
+							<h4>Exploring entropy control in the hypervisor</h4>
+							<p>
+								Course project with Tim Trippel and Andrew Quinn. Exploring the Linux kernel RNG and
+								entropy pool, and to what extent it can stealthily be controlled, subverted, or 
+								predicted via hypervisor access.
+							</p>
+							<h4>IP-LED</h4>
+							<p>
+								Worked with Aravind Vadrevu and advised by <a href="https://jhalderm.com">Alex Halderman</a> 
+								and <a href="http://www.impedimenttoprogress.com/">Matthew Hicks</a>. Designed a
+								modified <a href="https://zmap.io/">ZMap</a> scanner to send signals to large IP spaces
+								concurrently. Signals detected via smartphone app with image-recognition detecting
+								LED blinks on home routers. Allows determination of IP address using physical
+								side-channel.
+							</p>
+							<h3>2015</h3>
+							<h4>Bring Your Own Hospital</h4>
+							<p>
+								Worked with <a href="https://echavisspqr.wordpress.com/">Evan Chavis</a> and advised by 
+								<a href="https://web.eecs.umich.edu/~kevinfu/">Kevin Fu</a> and 
+								<a href="http://www.citi.umich.edu/u/honey/">Peter Honeyman</a> to build a replica
+								hospital network environment, building on 
+								<a href="http://minimega.org">minimega</a> and with help and advice from our friends at
+								the UM hospital. Evan did most of the heavy lifting on this one.
+							</p>
+							<h4>Blocking cache side channels through dynamic recompilation</h4>
+							<p>
+								Course project with Akshitha Sriraman and <a href="http://www-personal.umich.edu/~sairohit/">Sai Gouravajhala</a>. 
+								We designed
+								a system, building on <a href="http://dl.acm.org/citation.cfm?id=2742212">Protean Code</a>
+								and my earlier work replicating <a href="https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/yarom">FLUSH+RELOAD</a>,
+								that dynamically mitigates cache side channel
+								attacks in real time while under attack, but allows critical cryptographic subroutines
+								to execute in a faster, insecure mode when no attack is present.
+							</p>
+							<h4>Secure session key leakage in QUIC</h4>
+							<p>
+								Course project with Ofir Weisse and Tim Trippel. We designed an alternative to
+								Split TLS that uses the mechanism of leaking the session key in real-time to the
+								network gateway to allow network traffic introspection while maintaining end-to-end
+								encryption between the client and server.
+							</p>
+							<h4>Startup Project - Cache side channel attacks</h4>
+							<p>
+								<a href="https://web.eecs.umich.edu/~kevinfu/">Kevin Fu</a> had a great idea for a 
+								new PhD student. Spend 4 weeks reimplementing a recent conference paper to 
+								<ol>
+									<li>learn something new</li>
+									<li>get back into the research swing of things</li>
+								</ol>
+								I chose to reimplement <a href="https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/yarom">FLUSH+RELOAD</a>,
+								a cool cache side-channel attack that uses instruction cache leakage instead of the
+								more-common technique of analyzing data cache leakage.
 							</p>
 						</div>
 					</div>
