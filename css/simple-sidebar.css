@@ -45,6 +45,15 @@
 	padding: 15px;
 }
 
+#page-content-wrapper h4 {
+	font-weight: bold;
+}
+
+#page-content-wrapper hr {
+	height: 3px;
+	background-color: black;
+}
+
 #wrapper.toggled #page-content-wrapper {
 	position: absolute;
 	margin-right: -250px;
