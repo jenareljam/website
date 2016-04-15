@@ -28,3 +28,9 @@ ln -s $THIS_DIR/files $DOC_ROOT/
 cat $THIS_DIR/header.html $THIS_DIR/index.html $THIS_DIR/footer.html > $DOC_ROOT/index.html
 cat $THIS_DIR/header.html $THIS_DIR/teaching.html $THIS_DIR/footer.html > $DOC_ROOT/teaching.html
 cat $THIS_DIR/header.html $THIS_DIR/projects.html $THIS_DIR/footer.html > $DOC_ROOT/projects.html
+
+# replace keywords
+date=`date|cut -d " " -f 2,3,6`
+for file in $DOC_ROOT/*.html; do
+	sed -i "s/{date}/$date/" $file
+done
