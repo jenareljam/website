@@ -144,3 +144,7 @@
 		margin-right: 0;
 	}
 }
+
+.mono {
+	font-family: "Courier New", Courier, monospace;
+}
