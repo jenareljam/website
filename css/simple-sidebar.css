@@ -148,3 +148,7 @@
 .mono {
 	font-family: "Courier New", Courier, monospace;
 }
+
+.small_header {
+	font-size: 12px;
+}
