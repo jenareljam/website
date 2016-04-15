@@ -13,7 +13,7 @@ if [[ "$DOC_ROOT" == "" ]] ; then
 	echo "WOW -- BIG PROBLEM -- YOU ALMOST rm -rf'd YOUR DRIVE"
 	exit -1
 fi
-rm -rf $DOC_ROOT/*
+rm -r $DOC_ROOT/*
 # create new plain document_root
 echo -n "" > $DOC_ROOT/.placeholder # placeholder file for git
 
