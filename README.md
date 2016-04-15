@@ -8,7 +8,7 @@ I got tired of copying content between static html files, so I wrote a build scr
 
 Start Bootstrap is based on the [Bootstrap](http://getbootstrap.com/) framework created by [Mark Otto](https://twitter.com/mdo) and [Jacob Thorton](https://twitter.com/fat).
 
-This website originated from a Blackrock Digital Bootstrap template. As such, the parts originating from that source are licensed under the MIT license.
+This website originated from a [Blackrock Digital Bootstrap template](https://github.com/BlackrockDigital/startbootstrap-simple-sidebar). As such, the parts originating from that source are licensed under the MIT license.
 
 Copyright 2013-2016 Blackrock Digital LLC. Code released under the [MIT](https://github.com/BlackrockDigital/startbootstrap-simple-sidebar/blob/gh-pages/LICENSE) license.
 
