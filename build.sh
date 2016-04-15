@@ -5,13 +5,16 @@
 # Solution:					build website from pieces
 
 # setup
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+THIS_DIR="$( cd "$( /usr/bin/dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DOC_ROOT=$THIS_DIR/document_root
 
 # remove old document_root
-rm -rf $DOC_ROOT
+if [[ "$DOC_ROOT" == "" ]] ; then
+	echo "WOW -- BIG PROBLEM -- YOU ALMOST rm -rf'd YOUR DRIVE"
+	exit -1
+fi
+rm -rf $DOC_ROOT/*
 # create new plain document_root
-mkdir $DOC_ROOT
 echo -n "" > $DOC_ROOT/.placeholder # placeholder file for git
 
 
