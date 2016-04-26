@@ -33,6 +33,12 @@ cp $THIS_DIR/robots.txt $DOC_ROOT/robots.txt
 cat $THIS_DIR/header.html $THIS_DIR/index.html $THIS_DIR/footer.html > $DOC_ROOT/index.html
 cat $THIS_DIR/header.html $THIS_DIR/teaching.html $THIS_DIR/footer.html > $DOC_ROOT/teaching.html
 cat $THIS_DIR/header.html $THIS_DIR/projects.html $THIS_DIR/footer.html > $DOC_ROOT/projects.html
+# posts
+mkdir -p $DOC_ROOT/posts
+for post in `ls $THIS_DIR/posts/`;
+do
+	cat $THIS_DIR/header.html $THIS_DIR/posts/$post $THIS_DIR/footer.html > $DOC_ROOT/posts/$post
+done
 
 # replace keywords
 date=`date|cut -d " " -f 2,3,6`

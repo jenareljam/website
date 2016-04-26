@@ -62,6 +62,37 @@
 #profilepic img {
 	width: 250px;
 	margin-left: -20px;
+	padding: 0px;
+	border: 0px;
+}
+
+img.icon {
+	padding: 0px;
+	border: 0px;
+}
+
+img {
+	padding: 1px;
+	border: 2px solid #023a60;
+}
+
+figure {
+	margin: 15px;
+	display: table;
+	/*display: inline-block;*/
+}
+
+figcaption {
+	display: table-caption;
+	caption-side: bottom;
+	/*display: block;*/
+	text-align: justify;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+#posts_table th, td{
+	padding:5px;
 }
 
 #footer {

@@ -1,0 +1,381 @@
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-12">
+
+							<h2>Extending LibVMI into User Space Applications</h2>
+							<h5>April 26, 2016</h5>
+							<p>
+							Recently, I've been working with <a
+								href="http://libvmi.com">LibVMI</a> for a course project where
+							we were able to subvert the Linux kernel and OpenSSL RNGs in a
+							running VM.  The general overview can be found in our class <a
+							href="/static_docs/EECS588/paper.pdf">paper</a> on the projects
+						page.
+							</p>
+							<p>
+							Specifically, extending the attack from the kernel to user space
+							was tricky and there really wasn't much documentation on the
+							subject available online, so I wanted to document the process we
+							went through. Maybe it will be helpful to someone someday.
+							</p>
+							<p>
+							If you are interested in playing with the code yourself, you can
+							get it here: <a
+							href="https://github.com/jericks-umich/libvmi">GitHub</a>
+							</p>
+							<p>
+							As a brief background of the work on this project, we started
+							with the Kernel RNG attack (<a
+								href="https://github.com/jericks-umich/libvmi/blob/master/examples/rng-hook_kernel_fixed.c">rng-hook_kernel_fixed.c</a>),
+							which required creating a few helper constructs, such as a
+							"breakpoint" struct (and helper functions).
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/libvmi/extract_buf_breakpoints.png" />
+								<figcaption>Setting breakpoints just before and after the call to extract_buf.</figcaption>
+							</figure>
+							<p>
+							To find a good breakpoint location, we reversed random.c, the
+							kernel's random number generator, and found that random bytes
+							were extracted from the entropy pool in the extract_entropy_user
+							function. We can then look up the kernel memory address for the
+							extract_entropy_user function and jump a fixed known offset from
+							there to the instruction on which to break (line 1228 in 
+							<a href="http://lxr.free-electrons.com/source/drivers/char/random.c?v=4.4#L1203">random.c</a>). 
+							Using GDB on random.o worked great for this.
+							</p>
+							<figure>
+								<img width="360px" src="/img/posts/libvmi/extract_buf_asm.png" />
+								<figcaption>Output of the GDB command `pdisas extract_entropy_user'.</figcaption>
+							</figure>
+							<p>
+							Looks like the call to extract_buf is 155 bytes into
+							extract_entropy_user, and the instruction immediately after that
+							is at a 160-byte offset.
+							</p>
+							<figure>
+								<img width="220px" src="/img/posts/libvmi/extract_buf.png" />
+								<figcaption>Notice the argument order. On <a href="https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI">x86_64</a>, 
+								that means tmp will be passed in RSI.</figcaption>
+							</figure>
+							<p>
+							After that, we simply inspect the local variables ...
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/libvmi/callback1.png" />
+								<figcaption>Unfortunately, RSI get clobbered with the call to extract_buf so we have to record tmp's address beforehand.</figcaption>
+							</figure>
+							<p>
+							... and overwrite the tmp buffer containing random bytes with
+							whatever we want.
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/libvmi/callback2.png" />
+								<figcaption>Overwriting the generated random bytes with our signal value, RNG_VALUE (all 0x66's).</figcaption>
+							</figure>
+							<p>
+							Relatively simple, at least once all the code for setting
+							breakpoints was in place.
+							</p>
+							<figure>
+								<img width="500px" src="/img/posts/libvmi/random_bytes.png" />
+								<figcaption>Reading random bytes from /dev/urandom on the VM before and after we attach with LibVMI and launch the attack.</figcaption>
+							</figure>
+							<p>
+							However, extending this attack to Apache2 and OpenSSL was a bit
+							of a nightmare and the real story of this post.  Completely aside
+							from the fact that OpenSSL is somewhat of a mess under the hood
+							and therefore difficult to reverse engineer, simply moving from
+							kernel space introspection to user space introspection with
+							LibVMI is difficult in its own right.
+							</p>
+							<p>
+							To start with, we reverse engineered the Apache2 and OpenSSL
+							source code to pinpoint a good code location for introspection,
+							similar to the location in extract_entropy_user in the kernel
+							attack above.  We found it at the <a
+								href="https://github.com/openssl/openssl/blob/master/crypto/bn/bn_rand.c#L190">end
+								of the bnrand function</a> in OpenSSL. This is where new random
+							BIGNUM structs are generated and then returned for use in a
+							variety of crypto applications.
+							</p>
+							<figure>
+								<img width="260px" src="/img/posts/libvmi/bnrand_bin2bn.png" />
+								<figcaption>The moment a buffer of random bytes are converted to a BIGNUM.</figcaption>
+							</figure>
+							<p>
+							So, let's start finding the proper offsets into the bnrand
+							function for our breakpoints.
+							</p>
+							<figure>
+								<img width="300px" src="/img/posts/libvmi/ps_apache2.png" />
+								<figcaption>Finding Apache2's pid. We can use any of the three.</figcaption>
+							</figure>
+							<figure>
+								<img width="220px" src="/img/posts/libvmi/gdb_attach.png" />
+								<figcaption>You can use GDB to attach to running processes. Pretty cool huh?</figcaption>
+							</figure>
+							<figure>
+								<img width="220px" src="/img/posts/libvmi/no_bnrand.png" />
+								<figcaption>Looks like that symbol doesn't exist.</figcaption>
+							</figure>
+							<p>
+							Problem #1: Our function doesn't exist.
+							</p>
+							<figure>
+								<img width="500px" src="/img/posts/libvmi/BN_rand.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							Well, bnrand is called from BN_rand, so let's look at that.
+							</p>
+							<figure>
+								<img width="460px" src="/img/posts/libvmi/BN_rand_asm.png" />
+								<figcaption>We discovered this jmp goes to a different region of memory each time Apache2 is restarted in a new process.</figcaption>
+							</figure>
+							<p>
+							An unconditional jump. Goodie. Let's see what that's pointing at.
+							</p>
+							<figure>
+								<img width="500px" src="/img/posts/libvmi/bnrand_found.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							All those pushes look like the start of a function saving the
+							caller's register values. Let's scroll down...
+							</p>
+							<figure>
+								<img width="500px" src="/img/posts/libvmi/bnrand_call_to_bin2bn.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							Found it! So, the compiler optimized away the function call to
+							bnrand (sorta).  Well, that's going to make finding this memory
+							offset dynamically from LibVMI a real pain.  We'll need to start
+							at the symbol for BN_rand, then read the address at BN_rand+13
+							bytes (the address stored in the jmp instruction), then jump down
+							572 bytes (0x7f99441e59dc - 0x7f99441e57a0) from there to find
+							our breakpoint location.
+							</p>
+							<p>
+							Okay, so we'll just use LibVMI's handy user space symbol lookup
+							function to find BN_rand, do the above steps, and then everything
+							will work like the kernel approach above...
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/libvmi/libvmi_sym_lookup.png" />
+								<figcaption>Linux is unimplemented at this time!?</figcaption>
+							</figure>
+							<p>
+							Problem #2: Our function doesn't work.
+							</p>
+							<p>
+							So, as it turns out, because of the complexity that will shortly
+							become apparent, LibVMI doesn't currently support looking up user
+							space process symbols. Bummer! Well, what would it entail to do
+							it manually? Is there something in the kernel's process list data
+							structures that will let us go retrieve this information
+							ourselves?
+							</p>
+							<figure>
+								<img width="600px" src="/img/posts/libvmi/kernel_structs.png" />
+								<figcaption><a href="http://lxr.free-electrons.com/source/include/linux/sched.h#L1389">task_struct</a> is a kernel data structure that stores information about a running process. It is used in LibVMI's <a href="https://github.com/libvmi/libvmi/blob/master/examples/process-list.c">process-list</a> example code. Figure used with permission from Zhiqiang Lin.</figcaption>
+							</figure>
+							<p>
+							When the process runs, it loads (mmaps) all the dynamic libraries
+							(Linux shared objects) it needs into its virtual memory. These
+							libraries are loaded at unpredictable offsets. Also, when these
+							libraries are linked in at run time, all the symbol references to
+							functions in those libraries must be looked up as essentially a
+							fixed offset from the start of the library. Thus, it makes sense
+							that the symbol we're looking for (BN_rand) isn't going to be in
+							some global process symbol table, but rather in a symbol table
+							for the particular library.
+							</p>
+							<p>
+							So, I can't say I feel really comfortable with this yet, but from 
+							<a href="https://blogs.oracle.com/ali/entry/inside_elf_symbol_tables">
+								reading up about how symbols are stored in ELF files</a>
+							it looks like symbols can be categorized into <i>dynsym</i>
+							symbols and <i>symtab</i> symbols. Dynsym symbols are the global
+							symbols required to run the program and get loaded into memory
+							when the binary runs, whereas symtab symbols appear to be
+							<i>debugging</i> symbols, useful for getting GDB to print out
+							function names, but unnecessary for runtime linking.
+							</p>
+							<p>
+							This distinction between dynsym and symtab symbols looks
+							promising because BN_rand is probably a dynsym symbol and
+							therefore loaded into memory where we could dynamically grab it
+							with LibVMI.  <span style="color: green;">This looks like
+								something we can use to make the vmi_translate_sym2v function
+								work! Let's come back to this later (as in, another later
+								post).</span> 
+							</p>
+							<p>
+							However, at this point, I made another observation: The library
+							containing the BN_rand function is static, and so from the start
+							of the region of the library that gets mapped into memory, the
+							BN_rand function will always start at a fixed offset. Let's find
+							that offset.
+							</p>
+							<figure>
+								<img width="660px" src="/img/posts/libvmi/BN_rand_symbol.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							Great, so we've found the library Apache2 uses. This library will
+							be loaded into memory into one of those purple locations in the
+							Process Virtual Memory diagram above.
+							</p>
+							<p>
+							Now let's find the offset.
+							</p>
+							<figure>
+								<img width="620px" src="/img/posts/libvmi/BN_rand_lib_offset.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							Excellent. Since shared libraries use <a
+								href="https://en.wikipedia.org/wiki/Position-independent_code">Position-independent
+								code</a>, the BN_rand function will be located <b>0xd5a50</b>
+							bytes from the start of wherever this library gets mapped into
+							memory.
+							</p>
+							<p>
+							Before we proceed, let's make sure this checks out on the running
+							program.
+							</p>
+							<figure>
+								<img width="440px" src="/img/posts/libvmi/libcrypto_memory_location.png" />
+								<figcaption>Remember, the PID of our Apache2 process is 4560.</figcaption>
+							</figure>
+							<figure>
+								<img width="460px" src="/img/posts/libvmi/BN_rand_asm.png" />
+								<figcaption>Same image as before. Where does BN_rand start?</figcaption>
+							</figure>
+							<figure>
+								<img width="400px" src="/img/posts/libvmi/python_memory_math.png" />
+								<figcaption>Hey, that's the same offset that we got before!</figcaption>
+							</figure>
+							<p>
+							Great. We now know the offset from the start of libcrypto.so at
+							which we will find the BN_rand function, bypassing the entire
+							symbol lookup.
+							</p>
+							<p>
+							So, to review, so far we've identified:
+							<ol>
+								<li>we need to find the start of libcrypto.so in memory, dynamically</li>
+								<li>0xd5a50 bytes from there, we find the start of BN_rand</li>
+								<li>13 bytes into BN_rand, we find the address of bnrand</li>
+								<li>572 bytes into bnrand, we find the call to BN_bin2bn where we want to break</li>
+							</ol>
+							</p>
+							<p>
+							Guess it's time to see if we can find where the start of
+							libcrypto.so is in the process's virtual memory.
+							</p>
+							<figure>
+								<img width="600px" src="/img/posts/libvmi/kernel_structs.png" />
+								<figcaption>Same as before, just saving you from having to scroll.</figcaption>
+							</figure>
+							<p>
+							Just one more problem. Ya-know how all this code we're
+							introspecting is running on the VM?  Well, what if the VM kernel
+							data structures are compiled differently than the kernel data
+							structures on my host machine? Dang it. Now we need the offsets
+							of those structures directly from the VM. I modified the
+							<a href="https://github.com/jericks-umich/libvmi/commit/58e4b4a16f57658d615bf068c6469bb0f4568e33#diff-645368f3cdbb95a177a1f382a48a0bcf">linux-offset-finder</a>
+							tool that LibVMI provides to find all the offsets for those data structures.
+							</p>
+							<p>
+							Also, did'ja know that the default seven parameters you put in
+							/etc/libvmi.conf when setting up LibVMI for the first time are
+							the <i>only</i> acceptable parameters?  No dynamic parameter
+							support at all. So, after grabbing all the offsets from the VM, I
+							just included them statically in the code and moved on.
+							</p>
+							<figure>
+								<img width="640px" src="/img/posts/libvmi/struct_offset_hack.png" />
+								<figcaption>Feels dirty writing code like this. Looked into making LibVMI dynamic, but coming up on a deadline, skipped it. I hope to come back and update LibVMI with dynamic configuration support and push it upstream.</figcaption>
+							</figure>
+							<p>
+							So, I updated the code (using the
+							<a href="https://github.com/libvmi/libvmi/blob/master/examples/process-list.c">process-list</a>
+							example as a guide) to find the Apache2 process (remember, we
+							don't care which one, they're all the same) and then wrote a
+							function, 
+							<a href="https://github.com/jericks-umich/libvmi/blob/master/examples/rng-hook_openssl.c#L420">walk_vmmap_for_lib</a>,
+							to walk the kernel data structures and return the first memory
+							address where libcrypto.so is loaded. (This could be extended to
+							return the Nth memory address where it's loaded, but wasn't
+							necessary in this case.)
+							</p>
+							<p>
+							Following the chain of dereferences and offsets described above,
+							we can find the proper place to set our breakpoint, and overwrite
+							OpenSSL's RNG'd bytes with whatever we want.
+							</p>
+							<figure>
+								<img width="260px" src="/img/posts/libvmi/bnrand_bin2bn.png" />
+								<figcaption>Just a reminder of argument order.</figcaption>
+							</figure>
+							<figure>
+								<img width="660px" src="/img/posts/libvmi/bnrand_callback.png" />
+								<figcaption>Callback code for overwriting random bytes when our breakpoint trips.</figcaption>
+							</figure>
+							<p>
+							In this case, what we want is a bunch of 0x66 bytes so it's easy
+							to detect. This could just as easily be a pseudorandom stream of
+							bytes generated with my public key, only predictable with my
+							private key (although asymmetric crypto may impose a noticible
+							performance hit, more research on that later).
+							</p>
+							<figure>
+								<img width="660px" src="/img/posts/libvmi/overwriting_priv_key.png" />
+								<figcaption>Overwriting Apache2's Diffie-Hellman 256-byte private key.</figcaption>
+							</figure>
+							<p>
+							Now, time to see if we can detect it!
+							</p>
+							<p>
+							Let's open up wireshark and capture a Server Key Exchange.
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/libvmi/server_key_exchange.png" />
+								<figcaption>Wireshark, inspecting publicly-visible Diffie-Hellman key exchange parameters.</figcaption>
+							</figure>
+							<p>
+							Take a moment to refresh your memory of the 
+							<a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffie-Hellman protocol</a>.
+							The server picks two public parameters, <b>p</b> and <b>g</b>.
+							Each side of the communication generates a random private key,
+							<b>priv</b> and passes the other their corresponding public key
+							<b>pub</b>, computed by taking <b>g^priv % p</b>.  Finally, the
+							session key that encrypts the rest of the TLS session is found on
+							both sides by taking <b>g^(priv_A * priv_B) % p</b>.
+							</p>
+							<p>
+							If a third-party can predict the private key of either side, then
+							using parameters passed in the clear during this key exchange,
+							they can compute the session key and do all sorts of bad things
+							to the connection.
+							</p>
+							<figure>
+								<img width="620px" src="/img/posts/libvmi/win.png" />
+								<figcaption>(g^priv % p) == pub</figcaption>
+							</figure>
+							<p>
+							If our attack worked, the random number OpenSSL generated for
+							<b>priv</b> should have been 256 bytes of 0x66.
+							</p>
+							<p>
+							Since taking <b>g</b> to this predicted <b>priv</b> power, modulo
+							<b>p</b> does in fact compute <b>pub</b>, we have successfully
+							subverted the OpenSSL RNG used in Apache2!
+							</p>
+
+						</div>
+					</div>
+				</div>
