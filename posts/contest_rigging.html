@@ -1,0 +1,287 @@
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-12">
+
+							<h2>How to Rig an Online Contest</h2>
+							<h5>May 3, 2016</h5>
+							<p>
+							<b>
+								Ethics alert! <br/>
+								Note that I did not actually rig this contest. My
+								number of submissions was strictly less than the allowed number
+								over the course of the contest.  What follows is an
+								intellectual exercise in practical security with a discussion
+								of better methods for detection and preventing this kind of
+								attack in the future.<br/>
+								I also redacted all the identifying materials I could to
+								preserve the relative anonymity of the company hosting this
+								contest.
+							</b>
+							</p>
+							<p>
+								Last night, my Mom emailed me a link to a local garden center
+								contest in which she had entered a cute photo.  The photos with
+								the most votes at the end of the week would receive a gift
+								card to the garden center running the contest, and the winning
+								photo would be featured on their Facebook page.
+							</p>
+							<figure>
+								<a href="/img/posts/contest_rigging/webpage_full.png">
+									<img width="360px" src="/img/posts/contest_rigging/webpage.png" />
+								</a>
+								<figcaption>The voting form of the website.</figcaption>
+							</figure>
+							<p>
+							After voting for my Mom's photo (you can tell which it is because
+							it's the cutest), I did what virutally anyone would do and
+							refreshed the page, then clicked "vote" again. Sadly, this time,
+							I was met with a message that my vote could not be accepted
+							because I already voted.
+							</p>
+							<figure>
+								<img width="360px" src="/img/posts/contest_rigging/already_voted.png" />
+								<figcaption>Bummer.</figcaption>
+							</figure>
+							<p>
+							So, being the curious soul I am, I wanted to know exactly what
+							mechanism they were using to detect duplicate votes and prevent
+							cheating. 
+							</p>
+							<p>
+							<b>Attempt #1</b><br/>
+							Opened a Chrome incognito window to clear cookies. See if they're
+							simply doing a cookie check (which, since the client can modify
+							the cookies, could be easily bypassed). Nope. Still can't vote a
+							second time.
+							</p>
+							<p>
+							<b>Attempt #2</b><br/>
+							Maybe they're using a combination of IP address and user-agent or
+							other request properties, so that multiple users at the same
+							residence can vote once-per-day, each.  Opened the page in
+							Firefox (incognito, for good measure), still couldn't vote again.
+							Just to be sure, I also borrowed my wife's computer (a mac), and
+							couldn't vote from her computer either.
+							</p>
+							<p>
+							<b>Attempt #3</b><br/>
+							Maybe they're filtering purely based on IP address.  Set up a SSH
+							SOCKS proxy to a machine at work and configured Firefox to use
+							it.  Boom. Vote accepted. So, it appears each IP address gets one
+							vote per day. If, hypothetically, you had the ability to acquire
+							lots of IP addresses (say, by spawning
+							multiple VMs on <a href="https://aws.amazon.com/ec2/?nc2=h_l3_c">Amazon EC2</a>),
+							you could vote as many times as you wanted.
+							</p>
+							<p>
+							First step, automate it.<br/>
+							<b>curl</b> is a nice command-line tool that allows us to make
+							arbitrary web requests, so let's use curl to emulate a browser
+							visiting the site. First, let's take a look at what Chrome does
+							when it visits the site legitimately.
+							</p>
+							<figure>
+								<a href="/img/posts/contest_rigging/request.png">
+									<img width="700px" src="/img/posts/contest_rigging/request.png" />
+								</a>
+								<figcaption>Looking at the request headers from Chrome's developer console (F12).</figcaption>
+							</figure>
+							<p>
+							At least initially, Chrome makes a standard HTTP request to the
+							<redacted>/contests/ page.
+							</p>
+							<figure>
+								<a href="/img/posts/contest_rigging/response.png">
+									<img width="700px" src="/img/posts/contest_rigging/response.png" />
+								</a>
+								<figcaption>Looking at the response headers from Chrome's developer console (F12).</figcaption>
+							</figure>
+							<p>
+							Looks like the page sets some cookies when we visit it. Any
+							future requests to the site will include those cookies, so we too
+							should record and replay those cookies with any later requests.
+							</p>
+							<figure>
+								<img width="500px" src="/img/posts/contest_rigging/basic_curl.png" />
+								<figcaption>Emulating a browser's first request of the page.</figcaption>
+							</figure>
+							<p>
+							The above curl command will store any cookies in the HTTP
+							Response into a new file called cookie.jar. We can then use them
+							for later requests.
+							</p>
+							<p>
+							Next, let's see what happens when we click the "Vote" button.
+							</p>
+							<figure>
+								<a href="/img/posts/contest_rigging/post_request.png">
+									<img width="700px" src="/img/posts/contest_rigging/post_request.png" />
+								</a>
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							A POST request gets sent to /wp-admin/admin-ajax.php with the content 
+							"action=contest_submit&ampcontest=11841&ampcontestant=&ltredacted&gt",
+							where <b>contest</b> matches a field on the original page, and
+							<b>contestant</b> matches the photo we're voting for (the cutest one).
+							</p>
+							<p>
+							We can <i>probably</i> safely hardcode the contestant value, but
+							let's actually parse the resulting webpage from our first request
+							to dynamically find the contest id.  Who knows, maybe they change
+							it every 24 hours and that's their mechanism for once-per-day.
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/contest_rigging/curl_contest.png" />
+								<figcaption>Turning this into a bash script. I prefer python to awk.</figcaption>
+							</figure>
+							<p>
+							In the above code, we're now taking our curl command, piping it
+							into a python script that performs a regex search for the
+							parameter 'data-contest-id="11841"' and storing the value 11841
+							into the variable <i>contest</i>.
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/contest_rigging/curl_post.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							All we have to do is submit the POST request with curl and we can
+							vote from the command line.
+							</p>
+							<figure>
+								<img width="600px" src="/img/posts/contest_rigging/running_vote.png" />
+								<figcaption>Fail.</figcaption>
+							</figure>
+							<p>
+							Success!<br/>
+							Now, we have a way to submit votes, but because it's checking our IP
+							address between subsequent votes, we need to make the request from
+							another IP address.
+							</p>
+							<p>
+							Let's do it with a 
+							<a href="https://en.wikipedia.org/wiki/SOCKS">SOCKS proxy</a>
+							and SSH. 
+							</p>
+							<figure>
+								<img width="460px" src="/img/posts/contest_rigging/ssh_socks.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							First, we set up our tunnel to another machine we own.
+							</p>
+							<figure>
+								<img width="700px" src="/img/posts/contest_rigging/vote_socks.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							Next, we update the curl commands to use the new SOCKS proxy.
+							</p>
+							<figure>
+								<img width="440px" src="/img/posts/contest_rigging/vote_success.png" />
+								<figcaption>Win.</figcaption>
+							</figure>
+							<p>
+							Finally, we rerun the script to vote. This time, it works!
+							</p>
+							<p>
+							This works great, but can we take it a step further? I can go on 
+							Amazon's EC2 cloud and provision a bunch of VMs with IP addresses,
+							then route my traffic through each one once to vote, but this will
+							cost me time and money, and is difficult to further automate.
+							</p>
+							<p>
+							What about using <a href="https://www.torproject.org/">Tor</a>?
+							Tor is an anonymity service that bounces traffic around the globe
+							before sending it on to its eventual destination.
+							</p>
+							<p>
+							We can use the handy <b>torsocks</b> utility to wrap our curl
+							command and push our requests through Tor!
+							</p>
+							<figure>
+								<img width="620px" src="/img/posts/contest_rigging/torsocks.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							This works just as well, and we can run it over and over again
+							simply by tearing down the Tor circuit and rebuilding it between
+							votes.
+							</p>
+							<p>
+							This is where I stopped, but there's plenty of further work to do
+							to turn this into a full-fledged rigging.
+							</p>
+							<figure>
+								<img width="220px" src="/img/posts/contest_rigging/curl_useragent.png" />
+								<figcaption></figcaption>
+							</figure>
+							<p>
+							First, at the moment, my requests with curl all use curl's
+							UserAgent string.  This is a dead giveaway that the votes are
+							scripted and aren't coming from a user clicking buttons in their
+							browser. If I were to continue, I would use curl's -A argument to
+							pass a random UserAgent string from a 
+							<a href="http://www.useragentstring.com/pages/useragentstring.php">big list of UserAgent strings</a>.
+							</p>
+							<p>
+							The next major issue is that currently, the script makes requests
+							for the main page and the admin "cast vote" page. It doesn't
+							retrieve any of the elements on the main page before casting a
+							vote, such as the images of all the cute animals. A sysadmin that
+							checks the web server's access logs will quickly notice a series
+							of paired requests without accompanying retrievals of page
+							elements (CSS, JavaScript, images, etc.). This is quite
+							suspicious, and makes identifying our fradulent votes very easy.
+							To make our requests more realistic, we could use <b>wget</b>
+							instead of curl. wget's -r option recursively pulls down all page
+							elements and so would better emulate real browser behavior.
+							</p>
+							<p>
+							<b>Detection</b><br/>
+							So, how could we detect or mitigate this attack?<br/>
+							It probably won't be possible to get complete certainty
+							about whether particular votes are fraudulent or not. However,
+							there are some additional things we can do.
+							<ul>
+								<li>Blacklist Tor IP addresses. All Tor endpoints are public.
+									We can simply blacklist them. The downside is that then
+									people who are concerned about their privacy cannot vote on
+									your site.</li>
+								<li>Identify heuristics of suspected fraudsters, then use those
+									characteristics to identify more fraudulent votes. In a
+									nutshell, machine learning. This would be particularly
+									effective against the current attack that does not use
+									legitimate UserAgent strings or retrieve page elements.</li>
+								<li>Use an online account for authentication rather than the
+									user's IP address. As shown in this post, it's relatively
+									simple to redirect your network traffic from a variety of IP
+									addresses. Fake accounts can also be created, but it is a
+									much harder challenge to automate and scale. It also
+									increases friction for your users who might not want to log
+									into their account at the moment.</li>
+							</ul>
+							Ultimately, this is a tough problem, as these defenses all have
+							drawbacks and take a not-insignificant amount of effort to implement.
+							However, this would be a <i>great</i> exercise to practice the
+							kinds of challenges that blue teams and incident responders face
+							all the time.
+							</p>
+							<p>
+							<b>A last word about ethics:</b><br/>
+							I performed this project for fun, and submitted, all-in-all,
+							approximately 10 votes for my Mom's picture.  This is fewer than
+							the 14 or so I could have voted myself according to the rules,
+							and should not affect the outcome of the contest.<br/>
+							I do not condone using the techniques presented here to undermine
+							the intended security precautions of any systems. I present these
+							techniques so that you and I can become better security
+							practitioners.<br/>
+							As a final thought, in the course of this exercise I realized
+							this would make a great project for a future security course.
+							Both the offensive and defensive sides.
+							</p>
+						</div>
+					</div>
+				</div>

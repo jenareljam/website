@@ -41,7 +41,16 @@ do
 done
 
 # replace keywords
-date=`date|cut -d " " -f 2,3,6`
+month=`date|cut -d " " -f 2`
+if [[ ${#month} -lt 4 ]] ; # if a 3-letter month, then there's an extra space, which get's counted as another field
+then # 3-letter month
+	date=`date|cut -d " " -f 2,4,7`
+else # 4-letter month
+	date=`date|cut -d " " -f 2,3,6`
+fi
 for file in $DOC_ROOT/*.html; do
+	sed -i "s/{date}/$date/" $file
+done
+for file in $DOC_ROOT/posts/*.html; do
 	sed -i "s/{date}/$date/" $file
 done
