@@ -33,6 +33,7 @@ cp $THIS_DIR/robots.txt $DOC_ROOT/robots.txt
 cat $THIS_DIR/header.html $THIS_DIR/index.html $THIS_DIR/footer.html > $DOC_ROOT/index.html
 cat $THIS_DIR/header.html $THIS_DIR/teaching.html $THIS_DIR/footer.html > $DOC_ROOT/teaching.html
 cat $THIS_DIR/header.html $THIS_DIR/projects.html $THIS_DIR/footer.html > $DOC_ROOT/projects.html
+cat $THIS_DIR/header.html $THIS_DIR/nooneinthemiddle.html $THIS_DIR/footer.html > $DOC_ROOT/nooneinthemiddle.html
 # posts
 mkdir -p $DOC_ROOT/posts
 for post in `ls $THIS_DIR/posts/`;
