@@ -23,7 +23,7 @@ echo -n "" > $DOC_ROOT/.placeholder # placeholder file for git
 # supporting files (css, img, static content, etc.)
 cp -r $THIS_DIR/img $DOC_ROOT/
 cp -r $THIS_DIR/css $DOC_ROOT/
-cp -r $THIS_DIR/CV.pdf $DOC_ROOT/
+#cp -r $THIS_DIR/CV.pdf $DOC_ROOT/
 ln -s $THIS_DIR/files $DOC_ROOT/
 ln -s $THIS_DIR/static_docs $DOC_ROOT/
 

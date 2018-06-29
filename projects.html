@@ -3,7 +3,128 @@
 						<div class="col-lg-12">
 							<h1>Projects</h1>
 							<hr>
-							<h3>2016</h3>
+							<h4>
+								CommPact
+								<a href="/static_docs/commpact/CommPact__Slides.pdf">
+									<span title="Slides">
+										<img class="icon" src="/img/icons/ppt_icon.png" height=20px />
+									</span>
+								</a>
+							</h4>
+							<p>
+								This was my first foray into autonomous vehicle security.
+								Building on some prior work with SGX enclaves, I had a neat
+								idea.  What if, in autonomous vehicle platooning, we could get
+								each vehicle to <i>agree</i> not to crash into the other
+								vehicles in the platoon, and actually <i>enforce</i> that
+								agreement. This turned into the idea of autonomous vehicle
+								contracts. We explored the necessary consequences of forming
+								these contracts in practice, which led to building a contract
+								chain protocol to negotiate these contracts safely and ensure
+								that, even under attack, these autonomous vehicles would remain
+								safe for their passengers. 
+							</p>
+							<h4>Platoon Following Distance Calculator
+								<a href="/static_docs/platoonfollowingdistance/notes.pdf">
+									<span title="Notes">
+										<img class="icon" src="/img/icons/Adobe_PDF_file_icon_24x24.png" height=20px />
+									</span>
+								</a>
+							</h4>
+							<p>
+								This was a simple little side project I performed to evaluate
+								the feasibility of reactive approaches to attacks on autonomous
+								vehicle platoons.  Essentially, reactive appraoches, such as
+								intrusion detection, can only react as soon as they discover a
+								rogue vehicle has behaved anomalously.  This will, at minimum,
+								incur some short delay. When combined with differences in
+								vehicle braking deceleration rates, it becomes clear that
+								purely-reactive approaches to platooning safety are
+								insufficient. This motivates our later work on CommPact.
+							</p>
+							<p>
+								I built a fairly simple graph utility to display how adjusting
+								different initial parameters, such as vehicle speed,
+								deceleration rate, and reaction delay, impact the final
+								theoretical safe following distance. All parameters can be
+								adjusted via slider, and the graph shows how each parameter
+								will affect the necessary following distance, given the
+								currently-selected initial values.
+							</p>
+							<p>
+								<a href="https://github.com/jericks-umich/platoonfollowingdistance">Source Code</a>
+							</p>
+							<h4>
+								Dreamcatcher
+								<a href="/static_docs/nooneinthemiddle/No_one_in_the_Middle___AsiaCCS_2018___Paper.pdf">
+									<span title="Paper">
+										<img class="icon" src="/img/icons/Adobe_PDF_file_icon_24x24.png" height=20px />
+									</span>
+								</a>
+								<a href="/static_docs/nooneinthemiddle/No_one_in_the_Middle___AsiaCCS_2018___Slides.pdf">
+									<span title="Slides">
+										<img class="icon" src="/img/icons/ppt_icon.png" height=20px />
+									</span>
+								</a>
+							</h4>
+							<p>
+								This project started as a way to enhance a home router to provide:
+								<ol>
+									<li>A simple and intuitive method for users to manage local device communication</li>
+									<li>A secure authentication protocol for home networks to manage local devices</li>
+								</ol>
+								However, once we got into it, we realized we had actually
+								created an attribution mechanism that defends against almost
+								all Man-In-The-Middle attacks on local networks. Allowing users
+								to restrict which of their devices are allowed to communicate
+								with one another is a simple and effective access control
+								technique.  However, local identifiers such as MAC and IP
+								addresses can easily be spoofed by attackers, and so standard
+								access control techniques are useless.  To enable these
+								techniques, we bound each client device to a unique vNIC on the
+								router, and then associated each packet with the vNIC it
+								traversed. This solved a long-standing problem in local network
+								security. Our solution is built on OpenWRT and can be easily
+								built for a variety of different consumer routers. We published
+								this work under the name "No one in the Middle" at AsiaCCS in
+								2018.
+							</p>
+							<p>
+								<a href="/nooneinthemiddle.html">
+									Demo, Paper, slides, and source code
+								</a>
+							</p>
+							<h4>Jalapeno (<i>Jahl-ah-pee-no</i>)
+								<a href="/static_docs/EECS582/proposal.pdf">
+									<span title="Proposal">
+										<img class="icon" src="/img/icons/Adobe_PDF_file_icon_24x24.png" height=20px />
+									</span>
+								</a>
+								<a href="/static_docs/EECS582/midterm_slides.pdf">
+									<span title="Midterm Slides">
+										<img class="icon" src="/img/icons/ppt_icon.png" height=20px />
+									</span>
+								</a>
+								<a href="/static_docs/EECS582/paper.pdf">
+									<span title="Paper">
+										<img class="icon" src="/img/icons/Adobe_PDF_file_icon_24x24.png" height=20px />
+									</span>
+								</a>
+							</h4>
+							<p>
+								Course project with <a href="https://timothytrippel.com/">Tim Trippel</a>. 
+								After our previous work attacking Virtual Machine RNG from the
+								hypervisor, we came up with a solution using trusted hardware
+								(Intel SGX) to enable applications to securely perform their
+								needed crypto operations. We built a shared library that
+								instantiates an SGX enclave, provisions keys for use by a TLS
+								library such as OpenSSL, and provides protected crypto
+								operations within the trusted enclave. This approach prevents a
+								malicious OS or hypervisor from subverting the RNG.
+							</p>
+							<p>
+								<a href="https://github.com/jericks-umich/jalapeno">Source Code</a>
+							</p>
 							<h4>
 								Subverting the Linux RNG via the Xen hypervisor
 								<a href="/static_docs/EECS588/proposal.pdf">
@@ -33,27 +154,17 @@
 								</a>
 							</h4>
 							<p>
-								Course project with Tim Trippel and Andrew Quinn. Built attacks to programmatically
-								control the output of <span class="mono">/dev/random</span> and 
-								<span class="mono">/dev/urandom</span>, as well as the generation
-								of private keys for Diffie-Hellman key exchanges in Apache2/OpenSSL from the
-								hypervisor, without modification to the Virtual Machine. Explored artifacts
-								of these attacks and proposed detection methods to combat use in the wild.
+								Course project with <a href="https://timothytrippel.com/">Tim Trippel</a> 
+								and Andrew Quinn. Built attacks to programmatically control the
+								output of <span class="mono">/dev/random</span> and 
+								<span class="mono">/dev/urandom</span>, as well as the
+								generation of private keys for Diffie-Hellman key exchanges in
+								Apache2/OpenSSL from the hypervisor, without modification to the
+								Virtual Machine. Explored artifacts of these attacks and proposed
+								detection methods to combat use in the wild.
 							</p>
 							<p>
 							<a href="https://github.com/jericks-umich/libvmi">Source Code</a>
-							</p>
-							<h4>Building a secure home network</h4>
-							<p>
-								Working with <a href="http://web.eecs.umich.edu/~alfchen/">Qi Alfred Chen</a>
-								and advised by <a href="http://web.eecs.umich.edu/~zmao/">Morley Mao</a>. 
-								We just submitted a proposal to Google's
-								<a href="http://googleresearch.blogspot.de/2016/02/announcing-google-internet-of-things.html">IoT Technology Research Award</a>.
-								The idea is to provide
-								<ol>
-									<li>A simple and intuitive method for users to manage local device communication</li>
-									<li>A secure authentication protocol for home networks to manage local devices</li>
-								</ol>
 							</p>
 							<h4>IP-LED</h4>
 							<p>
@@ -92,8 +203,6 @@
 									SANS Pentesting Report
 								</a>) and a report due to the customer at the conclusion.
 							</p>
-							<hr>
-							<h3>2015</h3>
 							<h4>
 								Bring Your Own Hospital
 								<a href="/static_docs/BYOH/poster.pdf">
@@ -158,10 +267,11 @@
 							</h4>
 							<p>
 								Course project with <a href="http://www.ofirweisse.com/">Ofir Weisse</a>
-								and Tim Trippel. We designed an alternative to
-								Split TLS that uses the mechanism of leaking the session key in real-time to the
-								network gateway to allow network traffic introspection while maintaining end-to-end
-								encryption between the client and server.
+								and <a href="https://timothytrippel.com/">Tim Trippel</a>. We
+								designed an alternative to Split TLS that uses the mechanism of
+								leaking the session key in real-time to the network gateway to
+								allow network traffic introspection while maintaining
+								end-to-end encryption between the client and server.
 							</p>
 							<h4>
 								Startup Project - Cache side channel attacks
