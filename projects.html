@@ -4,6 +4,59 @@
 							<h1>Projects</h1>
 							<hr>
 							<h4>
+								Passwordless authentication with WebAuthn
+							</h4>
+							<p>
+								Another project I worked on soon after arriving at Duo, this
+								one involved learning about the new WebAuthn standard and
+								figuring out a path forward for Duo in a passwordless (and
+								2FA-less) world. In particular, 
+								<a href="https://nickmooney.com/">Nick Mooney</a> and I built
+								the <a href="https://duo.com/blog/introducing-the-webauthn-authenticator-open-source-library">first
+								WebAuthn client library</a> for Android and used it to build,
+								along with <a href="https://twitter.com/codekaiju?lang=en">Nick
+								Steele</a>, a prototype passwordless auth mechanism for the Duo
+								Mobile app. Hopefully, as WebAuthn and passwordless
+								authentication gains more traction, we will eventually see the
+								feature show up in the product for everyone to use.
+							</p>
+							<p>
+								<a href="https://github.com/duo-labs/android-webauthn-authenticator">
+									Source Code
+								</a>
+							</p>
+							<h4>
+								Working on the Apple T2 secure boot chip
+							</h4>
+							<p>
+								This was one of the two first projects I worked on as a new
+								Duonaut. <a href="https://twitter.com/sirus?lang=en">Mikhail Davidov</a> 
+								was already investigating the T2's secure boot process, and
+								asked me to investigate the ccommunication channel between the
+								T2 and the macOS host. After reversing Apple's proprietary XPC
+								protocol, we built tooling that would enable any unprivileged
+								process running on the mac to communicate with services running
+								on the T2 chip. Apple closed this attack vector within weeks of
+								our initial disclosure to them, but researchers willing to
+								disabled SIP on a test machine can still leverage our tooling
+								to continue to probe the T2 chip.
+							</p>
+							<p>
+								This work culminated in presentations both at <a
+								href="https://www.blackhat.com/us-19/briefings/schedule/index.html#inside-the-apple-t-15686">Black
+								Hat USA</a> and Cisco's Offensive Summit.
+							</p>
+							<p>
+								<a href="https://duo.com/labs/research/apple-t2-xpc">
+									Tech Report
+								</a>
+							</p>
+							<p>
+								<a href="https://github.com/duo-labs/apple-t2-xpc">
+									Tooling
+								</a>
+							</p>
+							<h4>
 								CommPact
 								<a href="/static_docs/commpact/Final_Manuscript.pdf">
 									<span title="Published Paper">
@@ -37,8 +90,9 @@
 							<p>
 								I had the privilege of working with
 								<a href="http://www-personal.umich.edu/~chshibo/">Shibo Chen</a>
-								and Melisa Savich on this project from the very beginning.  We
-								published this work at IEEE VNC in 2018.  
+								and <a href="https://melisasavich.io/">Melisa Savich</a> on
+								this project from the very beginning.  We published this work
+								at IEEE VNC in 2018.  
 							</p>
 							<p>
 								<a href="/commpact.html">
